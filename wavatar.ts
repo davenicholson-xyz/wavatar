@@ -290,7 +290,9 @@ class WavatarComponent extends HTMLElement {
     fileselect.addEventListener("change", (e) => {
       let imgfile = (<HTMLInputElement>e.target).files![0];
       this.src = URL.createObjectURL(imgfile);
-      cb && cb();
+      if (cb) {
+        cb();
+      }
     });
     fileselect.click();
     fileselect.remove();
