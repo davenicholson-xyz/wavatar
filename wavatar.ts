@@ -210,6 +210,7 @@ class WavatarComponent extends HTMLElement {
     this.clearCanvas();
 
     this.context.save();
+
     if (this.round) {
       this.clipRound();
       this.context.clip();
@@ -274,9 +275,8 @@ class WavatarComponent extends HTMLElement {
     }
   }
 
-  private emit(value: string) {
-    let debugInfo = {
-      event: value,
+  private debugInfo() {
+    return {
       canvas: { width: this.canvas.width, height: this.canvas.height },
       image: {
         src: this.image.src,
@@ -285,13 +285,21 @@ class WavatarComponent extends HTMLElement {
       },
       viewRect: this.viewRect,
       scale: this.scale,
-      scaleModifier: this.zoom,
+      zoom: this.zoom,
       mouseOnCanvas: this.mouseOnCanvas,
       mouseOnImage: this.mouseOnImage,
       round: this.round,
     };
+  }
+
+  private debug() {
+    return this.debugInfo();
+  }
+
+  private emit(value: string) {
+    let db = this.debugInfo();
     window.dispatchEvent(
-      new CustomEvent("wavatar-debug", { detail: debugInfo }),
+      new CustomEvent("wavatar-debug", { detail: { ...db, event: value } }),
     );
   }
 

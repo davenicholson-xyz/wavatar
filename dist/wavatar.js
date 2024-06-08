@@ -198,9 +198,8 @@ class WavatarComponent extends HTMLElement {
             this.imageOrigin.y = this.image.height - this.viewRect.height / 2;
         }
     }
-    emit(value) {
-        let debugInfo = {
-            event: value,
+    debugInfo() {
+        return {
             canvas: { width: this.canvas.width, height: this.canvas.height },
             image: {
                 src: this.image.src,
@@ -209,12 +208,18 @@ class WavatarComponent extends HTMLElement {
             },
             viewRect: this.viewRect,
             scale: this.scale,
-            scaleModifier: this.zoom,
+            zoom: this.zoom,
             mouseOnCanvas: this.mouseOnCanvas,
             mouseOnImage: this.mouseOnImage,
             round: this.round,
         };
-        window.dispatchEvent(new CustomEvent("wavatar-debug", { detail: debugInfo }));
+    }
+    debug() {
+        return this.debugInfo();
+    }
+    emit(value) {
+        let db = this.debugInfo();
+        window.dispatchEvent(new CustomEvent("wavatar-debug", { detail: { ...db, event: value } }));
     }
     fileSelect(cb) {
         let fileselect = document.createElement("input");
