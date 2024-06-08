@@ -4,13 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>wavatar</title>
+    <!-- <script src="https://davenicholson-xyz.github.io/scripts/wavatar/0.0.1/wavatar.js"></script> -->
     <script src="dist/wavatar.js"></script>
+    <style>
+      img {
+        border-radius: 20px;
+      }
+    </style>
   </head>
   <body>
-    <w-avatar
-      width="420"
-      height="420"
-      src="https://plus.unsplash.com/premium_photo-1669279283156-7cca8ccba55c?q=80&w=960&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-    ></w-avatar>
+    <div>
+      <w-avatar
+        width="420"
+        height="420"
+        src="https://plus.unsplash.com/premium_photo-1669279283156-7cca8ccba55c?q=80&w=960&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
+      ></w-avatar>
+      <img id="saved" />
+    </div>
+
+    <div>
+      <button id="save">save</button>
+    </div>
+
+    <script>
+      const wavatar = document.querySelector("w-avatar");
+
+      const save = document.querySelector("#save");
+      const saved = document.querySelector("#saved");
+
+      saved.width = wavatar.width;
+      saved.height = wavatar.height;
+
+      save.addEventListener("click", () => {
+        saved.src = wavatar.toPNG();
+      });
+
+      wavatar.addEventListener("dblclick", wavatar.fileSelect);
+    </script>
   </body>
 </html>

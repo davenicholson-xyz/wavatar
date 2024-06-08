@@ -16,7 +16,7 @@ class WavatarComponent extends HTMLElement {
   private canvas: HTMLCanvasElement;
   private context: CanvasRenderingContext2D;
   private scale: number;
-  private scaleModifier: number;
+  private zoom: number;
   private scaleMax: number;
   private dragging: boolean;
   private viewRect: Rect;
@@ -35,7 +35,7 @@ class WavatarComponent extends HTMLElement {
     this.image.addEventListener("load", this.imageChange.bind(this));
 
     this.scale = 1;
-    this.scaleModifier = 1;
+    this.zoom = 1;
     this.scaleMax = 5;
     this.dragging = false;
     this.viewRect = { x: 0, y: 0, width: 0, height: 0 };
@@ -152,19 +152,15 @@ class WavatarComponent extends HTMLElement {
       this.mouseOnCanvas = this.getCanvasPoint(e);
 
       this.mouseOnImage.x =
-        this.mouseOnCanvas.x / (this.scale * this.scaleModifier) +
-        this.viewRect.x;
+        this.mouseOnCanvas.x / (this.scale * this.zoom) + this.viewRect.x;
       this.mouseOnImage.y =
-        this.mouseOnCanvas.y / (this.scale * this.scaleModifier) +
-        this.viewRect.y;
+        this.mouseOnCanvas.y / (this.scale * this.zoom) + this.viewRect.y;
 
       if (this.dragging) {
         this.offset.x =
-          (this.mouseOnCanvas.x - this.dragStart.x) /
-          (this.scale * this.scaleModifier);
+          (this.mouseOnCanvas.x - this.dragStart.x) / (this.scale * this.zoom);
         this.offset.y =
-          (this.mouseOnCanvas.y - this.dragStart.y) /
-          (this.scale * this.scaleModifier);
+          (this.mouseOnCanvas.y - this.dragStart.y) / (this.scale * this.zoom);
         this.draw();
       }
       this.emit("mousemove");
@@ -174,9 +170,9 @@ class WavatarComponent extends HTMLElement {
       "wheel",
       (e) => {
         e.preventDefault();
-        let scale = this.scaleModifier + e.deltaY * -0.025;
+        let scale = this.zoom + e.deltaY * -0.025;
         scale = Math.min(this.scaleMax, Math.max(1, scale));
-        this.scaleModifier = scale;
+        this.zoom = scale;
         this.emit("wheel");
         this.draw();
       },
@@ -200,7 +196,7 @@ class WavatarComponent extends HTMLElement {
       this.canvas.width / this.image.width,
       this.canvas.height / this.image.height,
     );
-    this.scaleModifier = 1;
+    this.zoom = 1;
     this.imageOrigin.x = this.image.width / 2;
     this.imageOrigin.y = this.image.height / 2;
     this.emit("src");
@@ -235,7 +231,7 @@ class WavatarComponent extends HTMLElement {
   }
 
   private calculateViewRect() {
-    let scale = this.scale * this.scaleModifier;
+    let scale = this.scale * this.zoom;
     this.viewRect.width = this.canvas.width / scale;
     this.viewRect.height = this.canvas.height / scale;
     this.viewRect.x =
@@ -289,7 +285,7 @@ class WavatarComponent extends HTMLElement {
       },
       viewRect: this.viewRect,
       scale: this.scale,
-      scaleModifier: this.scaleModifier,
+      scaleModifier: this.zoom,
       mouseOnCanvas: this.mouseOnCanvas,
       mouseOnImage: this.mouseOnImage,
       round: this.round,
@@ -305,12 +301,16 @@ class WavatarComponent extends HTMLElement {
     fileselect.addEventListener("change", (e) => {
       let imgfile = (<HTMLInputElement>e.target).files![0];
       this.src = URL.createObjectURL(imgfile);
-      // if (cb) {
-      //   cb();
-      // }
+      if (typeof cb === "function") {
+        cb();
+      }
     });
     fileselect.click();
     fileselect.remove();
+  }
+
+  setZoom(value: number) {
+    this.zoom = Math.min(Math.max(value, 1), this.scaleMax);
   }
 
   toPNG() {
