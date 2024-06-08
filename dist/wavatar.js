@@ -33,6 +33,18 @@ class WavatarComponent extends HTMLElement {
     static get observedAttributes() {
         return ["src", "max", "round"];
     }
+    get width() {
+        return this.getAttribute("width");
+    }
+    set width(value) {
+        this.setAttribute("width", value);
+    }
+    get height() {
+        return this.getAttribute("height");
+    }
+    set height(value) {
+        this.setAttribute("height", value);
+    }
     get src() {
         return this.getAttribute("src");
     }
@@ -214,9 +226,9 @@ class WavatarComponent extends HTMLElement {
         fileselect.addEventListener("change", (e) => {
             let imgfile = e.target.files[0];
             this.src = URL.createObjectURL(imgfile);
-            if (cb) {
-                cb();
-            }
+            // if (cb) {
+            //   cb();
+            // }
         });
         fileselect.click();
         fileselect.remove();
