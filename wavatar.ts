@@ -317,8 +317,8 @@ class WavatarComponent extends HTMLElement {
     fileselect.remove();
   }
 
-  setZoom(value: number) {
-    this.zoom = Math.min(Math.max(value, 1), this.scaleMax);
+  setZoom(value: number | string) {
+    this.zoom = Math.min(Math.max(Number(value), 1), this.scaleMax);
   }
 
   toPNG() {

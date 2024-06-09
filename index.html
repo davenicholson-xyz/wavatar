@@ -34,7 +34,7 @@
 
     const scale = document.querySelector("#scale");
     scale.addEventListener("input", (e) => {
-      wavatar.setZoom(Number(e.target.value));
+      wavatar.setZoom(e.target.value);
       wavatar.draw();
     });
 
