@@ -85,11 +85,11 @@ class WavatarComponent extends HTMLElement {
     return this.hasAttribute("round");
   }
 
-  set round(_) {
+  set round(value) {
     this.setAttribute("round", "");
   }
 
-  private attributeChangedCallback(attr: string, _: any, newVal: string) {
+  private attributeChangedCallback(attr: string, oldVal: any, newVal: string) {
     switch (attr) {
       case "src":
         this.image.src = newVal;
@@ -205,7 +205,6 @@ class WavatarComponent extends HTMLElement {
 
   private draw() {
     this.calculateViewRect();
-    this.emit("draw");
 
     this.clearCanvas();
 
@@ -229,6 +228,7 @@ class WavatarComponent extends HTMLElement {
     );
 
     this.context.restore();
+    this.emit("draw");
   }
 
   private calculateViewRect() {
