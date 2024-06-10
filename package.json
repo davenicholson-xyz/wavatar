@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "watch" : "npx tsc --watch"
+    "watch": "npx tsc --watch",
+    "minify": "uglifyjs dist/wavatar.js > dist/wavatar.min.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
