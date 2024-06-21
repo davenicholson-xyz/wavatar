@@ -115,8 +115,8 @@ class WavatarComponent extends HTMLElement {
     <canvas></canvas>
     `;
 
-    this.canvas = this.shadow.querySelector("canvas");
-    this.context = this.canvas.getContext("2d");
+    this.canvas = this.shadow.querySelector("canvas") as HTMLCanvasElement;
+    this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
     this.canvas.width = parseInt(this.getAttribute("width")) || 200;
     this.canvas.height = parseInt(this.getAttribute("height")) || 200;
     this.image.crossOrigin = "anonymous";
