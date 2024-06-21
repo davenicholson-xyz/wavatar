@@ -115,8 +115,8 @@ class WavatarComponent extends HTMLElement {
     <canvas></canvas>
     `;
 
-    this.canvas = this.shadow.querySelector("canvas") as HTMLCanvasElement;
-    this.context = this.canvas.getContext("2d") as CanvasRenderingContext2D;
+    this.canvas = this.shadow.querySelector("canvas");
+    this.context = this.canvas.getContext("2d");
     this.canvas.width = parseInt(this.getAttribute("width")) || 200;
     this.canvas.height = parseInt(this.getAttribute("height")) || 200;
     this.image.crossOrigin = "anonymous";
@@ -135,35 +135,43 @@ class WavatarComponent extends HTMLElement {
 
     this.canvas.addEventListener("mousedown", (e) => {
       this.dragging = true;
-      this.dragStart = this.getCanvasPoint(e);
+      this.dragStart = this.getCanvasPoint(e.clientX, e.clientY);
       this.emit("mousedown");
     });
 
+    this.canvas.addEventListener(
+      "touchstart",
+      (e) => {
+        e.preventDefault();
+        this.dragging = true;
+        let touch = e.touches[0];
+        this.dragStart = this.getCanvasPoint(touch.clientX, touch.clientY);
+        this.emit("touchstart");
+      },
+      { passive: false },
+    );
+
     this.canvas.addEventListener("mouseup", () => {
-      this.dragging = false;
-      this.imageOrigin.x = this.imageOrigin.x - this.offset.x;
-      this.imageOrigin.y = this.imageOrigin.y - this.offset.y;
-      this.offset = { x: 0, y: 0 };
+      this.canvasUp();
       this.emit("mouseup");
       this.draw();
     });
 
+    this.canvas.addEventListener("touchend", () => {
+      this.canvasUp();
+      this.emit("touchend");
+      this.draw();
+    });
+
     this.canvas.addEventListener("mousemove", (e) => {
-      this.mouseOnCanvas = this.getCanvasPoint(e);
-
-      this.mouseOnImage.x =
-        this.mouseOnCanvas.x / (this.scale * this.zoom) + this.viewRect.x;
-      this.mouseOnImage.y =
-        this.mouseOnCanvas.y / (this.scale * this.zoom) + this.viewRect.y;
-
-      if (this.dragging) {
-        this.offset.x =
-          (this.mouseOnCanvas.x - this.dragStart.x) / (this.scale * this.zoom);
-        this.offset.y =
-          (this.mouseOnCanvas.y - this.dragStart.y) / (this.scale * this.zoom);
-        this.draw();
-      }
+      this.canvasMove(e.clientX, e.clientY);
       this.emit("mousemove");
+    });
+
+    this.canvas.addEventListener("touchmove", (e) => {
+      let touch = e.touches[0];
+      this.canvasMove(touch.clientX, touch.clientY);
+      this.emit("touchmove");
     });
 
     this.canvas.addEventListener(
@@ -180,11 +188,35 @@ class WavatarComponent extends HTMLElement {
     );
   }
 
-  private getCanvasPoint(e: MouseEvent) {
+  private getCanvasPoint(canvasX: number, canvasY: number) {
     let canvasRect = this.canvas.getBoundingClientRect();
-    let x = e.clientX - canvasRect.x;
-    let y = e.clientY - canvasRect.y;
+    let x = canvasX - canvasRect.left;
+    let y = canvasY - canvasRect.top;
     return { x, y };
+  }
+
+  private canvasMove(canvasX: number, canvasY: number) {
+    this.mouseOnCanvas = this.getCanvasPoint(canvasX, canvasY);
+
+    this.mouseOnImage.x =
+      this.mouseOnCanvas.x / (this.scale * this.zoom) + this.viewRect.x;
+    this.mouseOnImage.y =
+      this.mouseOnCanvas.y / (this.scale * this.zoom) + this.viewRect.y;
+
+    if (this.dragging) {
+      this.offset.x =
+        (this.mouseOnCanvas.x - this.dragStart.x) / (this.scale * this.zoom);
+      this.offset.y =
+        (this.mouseOnCanvas.y - this.dragStart.y) / (this.scale * this.zoom);
+      this.draw();
+    }
+  }
+
+  private canvasUp() {
+    this.dragging = false;
+    this.imageOrigin.x = this.imageOrigin.x - this.offset.x;
+    this.imageOrigin.y = this.imageOrigin.y - this.offset.y;
+    this.offset = { x: 0, y: 0 };
   }
 
   private clearCanvas() {
