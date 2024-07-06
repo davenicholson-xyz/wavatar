@@ -157,14 +157,17 @@ class WavatarComponent extends HTMLElement {
         e.preventDefault();
         this.finger1 = this.getCanvasPoint(e.touches[0].clientX, e.touches[0].clientY)
         this.start1 = this.finger1
+        this.dragging = true;
+        this.dragStart = this.finger1
+
         if (e.touches.length == 2) {
           this.pinching = true
           this.finger2 = this.getCanvasPoint(e.touches[1].clientX, e.touches[1].clientY)
           this.start2 = this.finger2
           this.start_distance = this.distanceBetweenPoints(this.finger1, this.finger2)
+          this.dragStart = this.centerPoint(this.finger1, this.finger2)
         }
-        this.dragging = true;
-        this.dragStart = this.getCanvasPoint(this.finger1.x, this.finger1.y);
+
         this.emit("touchstart");
       },
       { passive: false },
@@ -199,6 +202,8 @@ class WavatarComponent extends HTMLElement {
         scale = Math.min(this.scaleMax, Math.max(1, scale));
         this.zoom = scale;
         this.start_distance = this.distanceBetweenPoints(this.finger1, this.finger2)
+        let midpoint = this.centerPoint(this.finger1, this.finger2)
+        this.canvasMove(midpoint.x, midpoint.y);
         this.emit("pinchzoom");
         this.draw()
       } else {
