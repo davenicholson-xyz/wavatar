@@ -7,6 +7,12 @@ class WavatarComponent extends HTMLElement {
     zoom;
     scaleMax;
     dragging;
+    start1;
+    start2;
+    finger1;
+    finger2;
+    pinching;
+    start_distance;
     viewRect;
     imageOrigin;
     mouseOnCanvas;
@@ -29,6 +35,12 @@ class WavatarComponent extends HTMLElement {
         this.mouseOnImage = { x: 0, y: 0 };
         this.dragStart = { x: 0, y: 0 };
         this.offset = { x: 0, y: 0 };
+        this.start1 = { x: 0, y: 0 };
+        this.start2 = { x: 0, y: 0 };
+        this.finger1 = { x: 0, y: 0 };
+        this.finger2 = { x: 0, y: 0 };
+        this.pinching = false;
+        this.start_distance = 0;
     }
     static get observedAttributes() {
         return ["src", "max", "round"];
@@ -103,9 +115,16 @@ class WavatarComponent extends HTMLElement {
         });
         this.canvas.addEventListener("touchstart", (e) => {
             e.preventDefault();
+            this.finger1 = this.getCanvasPoint(e.touches[0].clientX, e.touches[0].clientY);
+            this.start1 = this.finger1;
+            if (e.touches.length == 2) {
+                this.pinching = true;
+                this.finger2 = this.getCanvasPoint(e.touches[1].clientX, e.touches[1].clientY);
+                this.start2 = this.finger2;
+                this.start_distance = this.distanceBetweenPoints(this.finger1, this.finger2);
+            }
             this.dragging = true;
-            let touch = e.touches[0];
-            this.dragStart = this.getCanvasPoint(touch.clientX, touch.clientY);
+            this.dragStart = this.getCanvasPoint(this.finger1.x, this.finger1.y);
             this.emit("touchstart");
         }, { passive: false });
         this.canvas.addEventListener("mouseup", () => {
@@ -114,6 +133,9 @@ class WavatarComponent extends HTMLElement {
             this.draw();
         });
         this.canvas.addEventListener("touchend", () => {
+            this.finger1 = { x: 0, y: 0 };
+            this.finger2 = { x: 0, y: 0 };
+            this.pinching = false;
             this.canvasUp();
             this.emit("touchend");
             this.draw();
@@ -123,8 +145,20 @@ class WavatarComponent extends HTMLElement {
             this.emit("mousemove");
         });
         this.canvas.addEventListener("touchmove", (e) => {
-            let touch = e.touches[0];
-            this.canvasMove(touch.clientX, touch.clientY);
+            this.finger1 = this.getCanvasPoint(e.touches[0].clientX, e.touches[0].clientY);
+            if (this.pinching) {
+                this.finger2 = this.getCanvasPoint(e.touches[1].clientX, e.touches[1].clientY);
+                let dist_change = this.distanceBetweenPoints(this.finger1, this.finger2) - this.start_distance;
+                let scale = this.zoom + dist_change * 0.02;
+                scale = Math.min(this.scaleMax, Math.max(1, scale));
+                this.zoom = scale;
+                this.start_distance = this.distanceBetweenPoints(this.finger1, this.finger2);
+                this.emit("pinchzoom");
+                this.draw();
+            }
+            else {
+                this.canvasMove(this.finger1.x, this.finger1.y);
+            }
             this.emit("touchmove");
         });
         this.canvas.addEventListener("wheel", (e) => {
@@ -155,6 +189,16 @@ class WavatarComponent extends HTMLElement {
                 (this.mouseOnCanvas.y - this.dragStart.y) / (this.scale * this.zoom);
             this.draw();
         }
+    }
+    centerPoint(p1, p2) {
+        let dx = p2.x - p1.x;
+        let dy = p2.y - p1.y;
+        return { x: p1.x + dx * 0.5, y: p1.y + dy * 0.5 };
+    }
+    distanceBetweenPoints(p1, p2) {
+        let dx = p1.x - p2.x;
+        let dy = p1.y - p2.y;
+        return Math.sqrt(dx * dx + dy + dy);
     }
     canvasUp() {
         this.dragging = false;
@@ -235,6 +279,12 @@ class WavatarComponent extends HTMLElement {
             mouseOnCanvas: this.mouseOnCanvas,
             mouseOnImage: this.mouseOnImage,
             round: this.round,
+            start1: this.start1,
+            start2: this.start2,
+            finger1: this.finger1,
+            figner2: this.finger2,
+            dragging: this.dragging,
+            pinching: this.pinching
         };
     }
     debug() {
