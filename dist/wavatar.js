@@ -157,7 +157,6 @@ class WavatarComponent extends HTMLElement {
                 let midpoint = this.centerPoint(this.finger1, this.finger2);
                 this.canvasMove(midpoint.x, midpoint.y);
                 this.emit("pinchzoom");
-                this.draw();
             }
             else {
                 this.canvasMove(this.finger1.x, this.finger1.y);
